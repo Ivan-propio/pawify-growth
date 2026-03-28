@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawify Growth Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="https://pawify.dev/lovable-uploads/5c350f48-97d8-4a9e-ab10-6dca2e82e498.png">
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <img src="https://pawify.dev/lovable-uploads/5c350f48-97d8-4a9e-ab10-6dca2e82e498.png" alt="Pawify" class="login-logo">
+        <h1>Pawify <span>Growth Hub</span></h1>
+        <p class="login-sub">Marketing, Leads & Outreach</p>
+        <form onsubmit="handleLogin(event)">
+            <input type="email" id="loginEmail" placeholder="Email" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button type="submit" class="btn btn-primary btn-full" id="loginBtn">Entrar</button>
+        </form>
+        <p id="loginError" class="login-error"></p>
+    </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="appScreen" class="app-screen" style="display:none;">
+
+    <div class="header">
+        <h1>
+            <img src="https://pawify.dev/lovable-uploads/5c350f48-97d8-4a9e-ab10-6dca2e82e498.png" alt="" style="height:32px;">
+            <span>Pawify</span> Growth Hub
+        </h1>
+        <div class="header-actions">
+            <div class="date" id="currentDate"></div>
+            <div class="user-info" id="userInfo"></div>
+            <button class="btn btn-secondary" onclick="handleLogout()">Salir</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('dashboard', this)">Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('emails', this)">Email Outreach</button>
+            <button class="tab-btn" onclick="switchTab('ideas', this)">Growth Ideas</button>
+        </div>
+
+        <!-- ==================== DASHBOARD TAB ==================== -->
+        <div class="tab-content active" id="tab-dashboard">
+            <div class="kpi-grid" id="kpiGrid"></div>
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Pipeline Funnel</h3>
+                    <div class="funnel" id="funnelChart"></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Leads by Country</h3>
+                    <div class="country-bars" id="countryChart"></div>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <div class="table-header">
+                    <h3>All Leads <span id="filteredCount" style="font-weight:400;color:var(--gray);font-size:14px;"></span></h3>
+                    <div class="filters">
+                        <input type="text" class="filter-input" id="searchInput" placeholder="Search..." oninput="applyFilters()" style="width:220px;">
+                        <select class="filter-input" id="countryFilter" onchange="applyFilters()"><option value="">All Countries</option></select>
+                        <select class="filter-input" id="statusFilter" onchange="applyFilters()"><option value="">All Statuses</option></select>
+                        <button class="btn btn-primary btn-small" onclick="openAddModal()">+ Add Lead</button>
+                        <button class="btn btn-outline btn-small" onclick="exportCSV()">Export CSV</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr id="tableHead"></tr></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+                <div class="table-footer">
+                    <span id="tableInfo"></span>
+                    <div class="pagination" id="pagination"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== EMAIL OUTREACH TAB ==================== -->
+        <div class="tab-content" id="tab-emails">
+            <div class="email-section">
+                <div class="email-controls">
+                    <label>Language:</label>
+                    <div class="email-pill-group" id="langPills">
+                        <button class="email-pill active" onclick="setLang('es', this)">ES</button>
+                        <button class="email-pill" onclick="setLang('fr', this)">FR</button>
+                        <button class="email-pill" onclick="setLang('pt', this)">PT</button>
+                        <button class="email-pill" onclick="setLang('en', this)">EN</button>
+                    </div>
+                    <div class="divider-v"></div>
+                    <label>Preview:</label>
+                    <input type="text" class="filter-input" id="previewName" value="Protectora El Refugio" oninput="renderEmailPreview()" style="width:200px;">
+                    <input type="text" class="filter-input" id="previewCity" value="Madrid" oninput="renderEmailPreview()" style="width:120px;">
+                </div>
+
+                <div class="email-preview-grid">
+                    <div class="email-sidebar">
+                        <h4>3-Touch Sequence</h4>
+                        <div class="email-sequence-flow">
+                            <div class="seq-step active" onclick="setTouch('touch1', this)">
+                                <div class="seq-dot t1">1</div>
+                                <div class="seq-info"><div class="seq-title">Primer contacto</div><div class="seq-desc">Dia 0 &mdash; Presentacion + valor + CTA</div></div>
+                            </div>
+                            <div class="seq-step" onclick="setTouch('touch2', this)">
+                                <div class="seq-dot t2">2</div>
+                                <div class="seq-info"><div class="seq-title">Follow-up</div><div class="seq-desc">Dia +5 &mdash; Urgencia + prueba social</div></div>
+                            </div>
+                            <div class="seq-step" onclick="setTouch('touch3', this)">
+                                <div class="seq-dot t3">3</div>
+                                <div class="seq-info"><div class="seq-title">Ultimo intento</div><div class="seq-desc">Dia +10 &mdash; Scarcity + puerta abierta</div></div>
+                            </div>
+                        </div>
+                        <hr class="sep">
+                        <h4>Config SMTP</h4>
+                        <div class="email-info-item"><div class="email-info-label">Remitente</div><div class="email-info-value">Oliver &middot; Pawify</div></div>
+                        <div class="email-info-item"><div class="email-info-label">Email</div><div class="email-info-value">oliver@pawify.org</div></div>
+                        <div class="email-info-item"><div class="email-info-label">SMTP</div><div class="email-info-value">Brevo (smtp-relay)</div></div>
+                        <div class="email-info-item"><div class="email-info-label">Warmup</div><div class="email-info-value">50 &rarr; 500/dia (4 weeks)</div></div>
+                    </div>
+                    <div class="email-render-area">
+                        <div class="email-render-header">
+                            <div class="subject" id="emailSubject">Loading...</div>
+                            <span class="email-badge" id="emailTouchBadge">Touch 1</span>
+                        </div>
+                        <div class="email-meta">
+                            <div><strong>From:</strong> Oliver &middot; Pawify &lt;oliver@pawify.org&gt;</div>
+                            <div><strong>To:</strong> <span id="emailTo">shelter@example.com</span></div>
+                        </div>
+                        <div class="email-render-body" id="emailBody"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== GROWTH IDEAS TAB ==================== -->
+        <div class="tab-content" id="tab-ideas">
+            <div class="ideas-grid">
+                <div class="idea-card priority-high">
+                    <div class="idea-priority">ALTA PRIORIDAD</div>
+                    <h3>Outreach a protectoras</h3>
+                    <p>Secuencia de 3 emails automatizada a 271 refugios en 6 paises. Warmup de dominio activo.</p>
+                    <div class="idea-status active">En progreso</div>
+                </div>
+                <div class="idea-card priority-high">
+                    <div class="idea-priority">ALTA PRIORIDAD</div>
+                    <h3>SEO & Content Marketing</h3>
+                    <p>Blog con historias de adopcion, guias para protectoras. Posicionar "adopcion animal" + variantes locales.</p>
+                    <div class="idea-status planned">Planificado</div>
+                </div>
+                <div class="idea-card priority-medium">
+                    <div class="idea-priority">MEDIA</div>
+                    <h3>Social Media Organico</h3>
+                    <p>Instagram + TikTok con contenido de animales en adopcion. Colaboraciones con influencers pet.</p>
+                    <div class="idea-status planned">Planificado</div>
+                </div>
+                <div class="idea-card priority-medium">
+                    <div class="idea-priority">MEDIA</div>
+                    <h3>Partnerships con Veterinarias</h3>
+                    <p>Que veterinarias recomienden Pawify a sus clientes que quieren adoptar. Win-win.</p>
+                    <div class="idea-status planned">Planificado</div>
+                </div>
+                <div class="idea-card priority-medium">
+                    <div class="idea-priority">MEDIA</div>
+                    <h3>Referral Program para Protectoras</h3>
+                    <p>Cada protectora que se une recomienda a otras. Bonus: badge "Shelter verificado" en su perfil.</p>
+                    <div class="idea-status planned">Planificado</div>
+                </div>
+                <div class="idea-card priority-low">
+                    <div class="idea-priority">FUTURO</div>
+                    <h3>PR & Prensa</h3>
+                    <p>Nota de prensa en medios de animales, entrevistas en podcasts, feature en ProductHunt.</p>
+                    <div class="idea-status planned">Planificado</div>
+                </div>
+                <div class="idea-card priority-low">
+                    <div class="idea-priority">FUTURO</div>
+                    <h3>Google Ads (Grant Nonprofits)</h3>
+                    <p>Solicitar Google Ad Grant ($10k/mes gratis) para ONGs. Ads en busquedas de adopcion.</p>
+                    <div class="idea-status planned">Planificado</div>
+                </div>
+                <div class="idea-card priority-low">
+                    <div class="idea-priority">FUTURO</div>
+                    <h3>Eventos & Ferias de Adopcion</h3>
+                    <p>Presencia en ferias de mascotas + organizar adopciones virtuales via Pawify.</p>
+                    <div class="idea-status planned">Planificado</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Lead Modal -->
+<div class="modal-overlay" id="leadModal">
+    <div class="modal">
+        <h2 id="modalTitle">Add New Lead</h2>
+        <input type="hidden" id="editId" value="">
+        <div class="form-row">
+            <div class="form-group"><label>Shelter Name *</label><input type="text" id="f_name" required></div>
+            <div class="form-group"><label>Email *</label><input type="email" id="f_email" required></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Country</label><input type="text" id="f_country" value="Espana"></div>
+            <div class="form-group"><label>City</label><input type="text" id="f_city"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Phone</label><input type="text" id="f_phone"></div>
+            <div class="form-group"><label>Website</label><input type="url" id="f_website"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Status</label>
+                <select id="f_status">
+                    <option value="new">New</option><option value="researching">Researching</option><option value="contacted">Contacted</option>
+                    <option value="follow_up_needed">Follow-up Needed</option><option value="replied">Replied</option><option value="interested">Interested</option>
+                    <option value="onboarding">Onboarding</option><option value="joined_pawify">Joined Pawify</option><option value="not_interested">Not Interested</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Animal Types</label>
+                <select id="f_animal_types"><option value="all">All</option><option value="dogs">Dogs</option><option value="cats">Cats</option><option value="exotic">Exotic</option></select>
+            </div>
+        </div>
+        <div class="form-group"><label>Notes</label><textarea id="f_notes" rows="2"></textarea></div>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-danger btn-small" id="deleteBtn" onclick="deleteLead()" style="display:none;">Delete</button>
+            <button class="btn btn-primary" onclick="saveLead()">Save Lead</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script src="emails.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
