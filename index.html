@@ -45,6 +45,7 @@
         <div class="tab-nav">
             <button class="tab-btn active" onclick="switchTab('dashboard', this)">Dashboard</button>
             <button class="tab-btn" onclick="switchTab('emails', this)">Email Outreach</button>
+            <button class="tab-btn" onclick="switchTab('social', this)">Social Media</button>
             <button class="tab-btn" onclick="switchTab('ideas', this)">Growth Ideas</button>
         </div>
 
@@ -137,6 +138,320 @@
                             <div><strong>To:</strong> <span id="emailTo">shelter@example.com</span></div>
                         </div>
                         <div class="email-render-body" id="emailBody"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SOCIAL MEDIA TAB ==================== -->
+        <div class="tab-content" id="tab-social">
+            <!-- Sub-navigation -->
+            <div class="sm-subnav" id="smSubnav">
+                <button class="sm-subnav-btn active" onclick="switchSMSub('overview', this)"><span class="sm-subnav-icon">&#x2B1A;</span> Overview</button>
+                <button class="sm-subnav-btn" onclick="switchSMSub('composer', this)"><span class="sm-subnav-icon">+</span> Composer</button>
+                <button class="sm-subnav-btn" onclick="switchSMSub('calendar', this)"><span class="sm-subnav-icon">&#x1F4C5;</span> Calendar</button>
+                <button class="sm-subnav-btn" onclick="switchSMSub('posts', this)"><span class="sm-subnav-icon">&#x1F4C4;</span> Posts</button>
+                <button class="sm-subnav-btn" onclick="switchSMSub('engagement', this)"><span class="sm-subnav-icon">&#x1F4AC;</span> Engagement</button>
+                <button class="sm-subnav-btn" onclick="switchSMSub('dms', this)"><span class="sm-subnav-icon">&#x2709;</span> DMs</button>
+                <button class="sm-subnav-btn" onclick="switchSMSub('analytics', this)"><span class="sm-subnav-icon">&#x1F4CA;</span> Analytics</button>
+                <button class="sm-subnav-btn" onclick="switchSMSub('strategy', this)"><span class="sm-subnav-icon">&#x2728;</span> Strategy</button>
+            </div>
+
+            <!-- ===== OVERVIEW SUB-TAB ===== -->
+            <div class="sm-sub-content active" id="sm-overview">
+                <div class="sm-kpi-grid">
+                    <div class="sm-kpi-card">
+                        <div class="sm-kpi-icon" style="background:hsl(155 60% 92%);color:var(--green);">&#x1F465;</div>
+                        <div class="sm-kpi-data"><div class="sm-kpi-value" id="smFollowers">0</div><div class="sm-kpi-label">FOLLOWERS</div></div>
+                    </div>
+                    <div class="sm-kpi-card">
+                        <div class="sm-kpi-icon" style="background:hsl(155 60% 92%);color:var(--green);">&#x1F441;</div>
+                        <div class="sm-kpi-data"><div class="sm-kpi-value" id="smViews">0</div><div class="sm-kpi-label">VIEWS</div></div>
+                    </div>
+                    <div class="sm-kpi-card">
+                        <div class="sm-kpi-icon" style="background:hsl(210 70% 92%);color:var(--blue);">&#x2764;</div>
+                        <div class="sm-kpi-data"><div class="sm-kpi-value" id="smLikes">0</div><div class="sm-kpi-label">LIKES</div></div>
+                    </div>
+                    <div class="sm-kpi-card">
+                        <div class="sm-kpi-icon" style="background:hsl(30 80% 92%);color:var(--orange);">&#x1F552;</div>
+                        <div class="sm-kpi-data"><div class="sm-kpi-value" id="smScheduled">0</div><div class="sm-kpi-label">SCHEDULED</div></div>
+                    </div>
+                    <div class="sm-kpi-card">
+                        <div class="sm-kpi-icon" style="background:hsl(270 50% 92%);color:var(--purple);">&#x1F4AC;</div>
+                        <div class="sm-kpi-data"><div class="sm-kpi-value" id="smComments">0</div><div class="sm-kpi-label">COMMENTS</div></div>
+                    </div>
+                    <div class="sm-kpi-card">
+                        <div class="sm-kpi-icon" style="background:hsl(0 60% 92%);color:var(--red);">&#x2709;</div>
+                        <div class="sm-kpi-data"><div class="sm-kpi-value" id="smDms">0</div><div class="sm-kpi-label">DMS</div></div>
+                    </div>
+                </div>
+
+                <div class="sm-section-card">
+                    <h3>Connected Accounts</h3>
+                    <div class="sm-accounts-list" id="smAccountsList">
+                        <div class="sm-account-empty">
+                            <p>Go to <a href="#" onclick="switchSMSub('strategy', document.querySelector('[onclick*=strategy]'));return false;">Settings</a> to connect your accounts.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sm-section-card">
+                    <h3>Quick Actions</h3>
+                    <div class="sm-quick-actions">
+                        <button class="sm-quick-btn" onclick="switchSMSub('composer', document.querySelector('[onclick*=composer]'))">
+                            <span class="sm-quick-icon">+</span>
+                            <span>New Post</span>
+                        </button>
+                        <button class="sm-quick-btn" onclick="switchSMSub('calendar', document.querySelector('[onclick*=calendar]'))">
+                            <span class="sm-quick-icon">&#x1F4C5;</span>
+                            <span>Calendar</span>
+                        </button>
+                        <button class="sm-quick-btn" onclick="switchSMSub('engagement', document.querySelector('[onclick*=engagement]'))">
+                            <span class="sm-quick-icon">&#x1F4AC;</span>
+                            <span>Engagement</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== COMPOSER SUB-TAB ===== -->
+            <div class="sm-sub-content" id="sm-composer">
+                <div class="sm-composer-layout">
+                    <div class="sm-composer-editor">
+                        <div class="sm-section-card">
+                            <h3>Create Post</h3>
+                            <div class="sm-composer-platforms">
+                                <label class="sm-platform-check"><input type="checkbox" value="instagram" checked> <span class="sm-platform-badge instagram">Instagram</span></label>
+                                <label class="sm-platform-check"><input type="checkbox" value="tiktok"> <span class="sm-platform-badge tiktok">TikTok</span></label>
+                                <label class="sm-platform-check"><input type="checkbox" value="facebook"> <span class="sm-platform-badge facebook">Facebook</span></label>
+                            </div>
+                            <textarea class="sm-composer-textarea" id="smComposerText" placeholder="What do you want to share?" rows="6"></textarea>
+                            <div class="sm-composer-media-zone" id="smMediaZone" onclick="document.getElementById('smMediaInput').click()">
+                                <input type="file" id="smMediaInput" accept="image/*,video/*" style="display:none" onchange="handleSMMedia(this)">
+                                <div class="sm-media-placeholder" id="smMediaPlaceholder">
+                                    <span>&#x1F4F7;</span>
+                                    <p>Click to add photos or videos</p>
+                                </div>
+                                <div class="sm-media-preview" id="smMediaPreview" style="display:none;"></div>
+                            </div>
+                            <input type="text" class="filter-input" id="smComposerHashtags" placeholder="#adopta #pawify #mascotas" style="width:100%;margin-top:12px;">
+                            <div class="sm-composer-actions">
+                                <div class="sm-composer-left">
+                                    <input type="datetime-local" class="filter-input" id="smScheduleDate">
+                                </div>
+                                <div class="sm-composer-right">
+                                    <button class="btn btn-ghost btn-small" onclick="saveSMDraft()">Save Draft</button>
+                                    <button class="btn btn-primary btn-small" onclick="scheduleSMPost()">Schedule Post</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sm-composer-preview">
+                        <div class="sm-section-card">
+                            <h3>Preview</h3>
+                            <div class="sm-phone-preview">
+                                <div class="sm-phone-header">
+                                    <div class="sm-phone-avatar">P</div>
+                                    <div class="sm-phone-user"><strong>pawify.dev</strong><br><span>Pawify</span></div>
+                                </div>
+                                <div class="sm-phone-image" id="smPreviewImage">
+                                    <span>&#x1F4F7;</span>
+                                </div>
+                                <div class="sm-phone-actions">
+                                    <span>&#x2764;</span> <span>&#x1F4AC;</span> <span>&#x2197;</span>
+                                </div>
+                                <div class="sm-phone-caption" id="smPreviewCaption">
+                                    <strong>pawify.dev</strong> <span class="sm-phone-text">Your caption will appear here...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== CALENDAR SUB-TAB ===== -->
+            <div class="sm-sub-content" id="sm-calendar">
+                <div class="sm-section-card">
+                    <div class="sm-cal-header">
+                        <button class="btn btn-ghost btn-small" onclick="smCalPrev()">&#8249;</button>
+                        <h3 id="smCalTitle"></h3>
+                        <button class="btn btn-ghost btn-small" onclick="smCalNext()">&#8250;</button>
+                    </div>
+                    <div class="sm-cal-grid">
+                        <div class="sm-cal-dayname">Mon</div>
+                        <div class="sm-cal-dayname">Tue</div>
+                        <div class="sm-cal-dayname">Wed</div>
+                        <div class="sm-cal-dayname">Thu</div>
+                        <div class="sm-cal-dayname">Fri</div>
+                        <div class="sm-cal-dayname">Sat</div>
+                        <div class="sm-cal-dayname">Sun</div>
+                    </div>
+                    <div class="sm-cal-body" id="smCalBody"></div>
+                </div>
+            </div>
+
+            <!-- ===== POSTS SUB-TAB ===== -->
+            <div class="sm-sub-content" id="sm-posts">
+                <div class="sm-section-card">
+                    <div class="sm-posts-header">
+                        <h3>All Posts</h3>
+                        <div class="sm-posts-filters">
+                            <select class="filter-input" id="smPostFilter" onchange="renderSMPosts()">
+                                <option value="all">All</option>
+                                <option value="draft">Drafts</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="published">Published</option>
+                            </select>
+                            <select class="filter-input" id="smPlatformFilter" onchange="renderSMPosts()">
+                                <option value="all">All Platforms</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="tiktok">TikTok</option>
+                                <option value="facebook">Facebook</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="sm-posts-list" id="smPostsList">
+                        <div class="sm-empty-state">
+                            <span>&#x1F4DD;</span>
+                            <p>No posts yet. Create your first post in the <a href="#" onclick="switchSMSub('composer', document.querySelector('[onclick*=composer]'));return false;">Composer</a>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ENGAGEMENT SUB-TAB ===== -->
+            <div class="sm-sub-content" id="sm-engagement">
+                <div class="sm-section-card">
+                    <h3>Engagement</h3>
+                    <div class="sm-empty-state">
+                        <span>&#x1F4AC;</span>
+                        <p>Connect your social accounts to track engagement, comments, and mentions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== DMS SUB-TAB ===== -->
+            <div class="sm-sub-content" id="sm-dms">
+                <div class="sm-section-card">
+                    <h3>Direct Messages</h3>
+                    <div class="sm-empty-state">
+                        <span>&#x2709;</span>
+                        <p>Connect your social accounts to manage direct messages from one place.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ANALYTICS SUB-TAB ===== -->
+            <div class="sm-sub-content" id="sm-analytics">
+                <div class="sm-section-card">
+                    <h3>Analytics</h3>
+                    <div class="sm-analytics-grid">
+                        <div class="sm-analytics-card">
+                            <h4>Followers Growth</h4>
+                            <div class="sm-analytics-chart-placeholder">
+                                <div class="sm-mini-bars">
+                                    <div class="sm-mini-bar" style="height:20%"></div>
+                                    <div class="sm-mini-bar" style="height:35%"></div>
+                                    <div class="sm-mini-bar" style="height:25%"></div>
+                                    <div class="sm-mini-bar" style="height:50%"></div>
+                                    <div class="sm-mini-bar" style="height:45%"></div>
+                                    <div class="sm-mini-bar" style="height:60%"></div>
+                                    <div class="sm-mini-bar" style="height:55%"></div>
+                                </div>
+                                <p class="sm-chart-note">Connect accounts to see real data</p>
+                            </div>
+                        </div>
+                        <div class="sm-analytics-card">
+                            <h4>Engagement Rate</h4>
+                            <div class="sm-analytics-chart-placeholder">
+                                <div class="sm-mini-bars">
+                                    <div class="sm-mini-bar accent" style="height:40%"></div>
+                                    <div class="sm-mini-bar accent" style="height:30%"></div>
+                                    <div class="sm-mini-bar accent" style="height:55%"></div>
+                                    <div class="sm-mini-bar accent" style="height:45%"></div>
+                                    <div class="sm-mini-bar accent" style="height:65%"></div>
+                                    <div class="sm-mini-bar accent" style="height:50%"></div>
+                                    <div class="sm-mini-bar accent" style="height:70%"></div>
+                                </div>
+                                <p class="sm-chart-note">Connect accounts to see real data</p>
+                            </div>
+                        </div>
+                        <div class="sm-analytics-card">
+                            <h4>Best Posting Times</h4>
+                            <div class="sm-best-times">
+                                <div class="sm-time-slot"><span class="sm-time-day">Mon</span><div class="sm-time-heatmap"><span class="h1"></span><span class="h2"></span><span class="h3"></span><span class="h2"></span></div></div>
+                                <div class="sm-time-slot"><span class="sm-time-day">Tue</span><div class="sm-time-heatmap"><span class="h2"></span><span class="h3"></span><span class="h2"></span><span class="h1"></span></div></div>
+                                <div class="sm-time-slot"><span class="sm-time-day">Wed</span><div class="sm-time-heatmap"><span class="h1"></span><span class="h2"></span><span class="h3"></span><span class="h3"></span></div></div>
+                                <div class="sm-time-slot"><span class="sm-time-day">Thu</span><div class="sm-time-heatmap"><span class="h3"></span><span class="h2"></span><span class="h1"></span><span class="h2"></span></div></div>
+                                <div class="sm-time-slot"><span class="sm-time-day">Fri</span><div class="sm-time-heatmap"><span class="h2"></span><span class="h3"></span><span class="h3"></span><span class="h1"></span></div></div>
+                            </div>
+                            <p class="sm-chart-note">Connect accounts to see real data</p>
+                        </div>
+                        <div class="sm-analytics-card">
+                            <h4>Top Content Types</h4>
+                            <div class="sm-content-types">
+                                <div class="sm-ct-row"><span class="sm-ct-label">Reels</span><div class="sm-ct-bar-wrap"><div class="sm-ct-bar" style="width:75%"></div></div><span class="sm-ct-pct">75%</span></div>
+                                <div class="sm-ct-row"><span class="sm-ct-label">Carousels</span><div class="sm-ct-bar-wrap"><div class="sm-ct-bar" style="width:60%"></div></div><span class="sm-ct-pct">60%</span></div>
+                                <div class="sm-ct-row"><span class="sm-ct-label">Images</span><div class="sm-ct-bar-wrap"><div class="sm-ct-bar" style="width:40%"></div></div><span class="sm-ct-pct">40%</span></div>
+                                <div class="sm-ct-row"><span class="sm-ct-label">Stories</span><div class="sm-ct-bar-wrap"><div class="sm-ct-bar" style="width:30%"></div></div><span class="sm-ct-pct">30%</span></div>
+                            </div>
+                            <p class="sm-chart-note">Sample data — connect to see yours</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== STRATEGY SUB-TAB ===== -->
+            <div class="sm-sub-content" id="sm-strategy">
+                <div class="sm-strategy-grid">
+                    <div class="sm-section-card">
+                        <h3>Content Strategy</h3>
+                        <div class="sm-strategy-pillars">
+                            <div class="sm-pillar">
+                                <div class="sm-pillar-icon" style="background:hsl(180 60% 92%);color:var(--primary);">&#x1F43E;</div>
+                                <h4>Adoption Stories</h4>
+                                <p>Before/after, happy endings, emotional content</p>
+                                <span class="sm-pillar-freq">3x/week</span>
+                            </div>
+                            <div class="sm-pillar">
+                                <div class="sm-pillar-icon" style="background:hsl(270 50% 92%);color:var(--purple);">&#x1F4DA;</div>
+                                <h4>Education</h4>
+                                <p>Tips, guides, responsible pet ownership</p>
+                                <span class="sm-pillar-freq">2x/week</span>
+                            </div>
+                            <div class="sm-pillar">
+                                <div class="sm-pillar-icon" style="background:hsl(30 80% 92%);color:var(--orange);">&#x1F3AC;</div>
+                                <h4>Behind the Scenes</h4>
+                                <p>Shelter life, volunteers, daily routines</p>
+                                <span class="sm-pillar-freq">2x/week</span>
+                            </div>
+                            <div class="sm-pillar">
+                                <div class="sm-pillar-icon" style="background:hsl(155 60% 92%);color:var(--green);">&#x1F91D;</div>
+                                <h4>Community</h4>
+                                <p>UGC, collaborations, events, challenges</p>
+                                <span class="sm-pillar-freq">1x/week</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sm-section-card">
+                        <h3>Platform Settings</h3>
+                        <div class="sm-platform-settings">
+                            <div class="sm-platform-row">
+                                <div class="sm-platform-info"><span class="sm-platform-badge instagram">Instagram</span></div>
+                                <div class="sm-platform-detail"><span class="sm-detail-label">Handle</span><span class="sm-detail-value">@pawify.dev</span></div>
+                                <div class="sm-platform-detail"><span class="sm-detail-label">Status</span><span class="sm-detail-value sm-status-pending">Not connected</span></div>
+                            </div>
+                            <div class="sm-platform-row">
+                                <div class="sm-platform-info"><span class="sm-platform-badge tiktok">TikTok</span></div>
+                                <div class="sm-platform-detail"><span class="sm-detail-label">Handle</span><span class="sm-detail-value">@pawify</span></div>
+                                <div class="sm-platform-detail"><span class="sm-detail-label">Status</span><span class="sm-detail-value sm-status-pending">Not connected</span></div>
+                            </div>
+                            <div class="sm-platform-row">
+                                <div class="sm-platform-info"><span class="sm-platform-badge facebook">Facebook</span></div>
+                                <div class="sm-platform-detail"><span class="sm-detail-label">Page</span><span class="sm-detail-value">Pawify</span></div>
+                                <div class="sm-platform-detail"><span class="sm-detail-label">Status</span><span class="sm-detail-value sm-status-pending">Not connected</span></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

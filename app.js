@@ -155,6 +155,7 @@ function switchTab(tab, btn) {
     btn.classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
     if (tab === 'emails') renderEmailPreview();
+    if (tab === 'social') initSocialMedia();
 }
 
 // ===== EMAIL PREVIEW =====
@@ -432,6 +433,240 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeModal();
     if (e.key === 'n' && e.ctrlKey) { e.preventDefault(); openAddModal(); }
 });
+
+// ===== SOCIAL MEDIA =====
+let smPosts = JSON.parse(localStorage.getItem('pawify_sm_posts') || '[]');
+let smCalDate = new Date();
+let smInitialized = false;
+
+function saveSMData() {
+    localStorage.setItem('pawify_sm_posts', JSON.stringify(smPosts));
+}
+
+function initSocialMedia() {
+    updateSMKPIs();
+    renderSMCalendar();
+    renderSMPosts();
+    if (!smInitialized) {
+        const textarea = document.getElementById('smComposerText');
+        if (textarea) {
+            textarea.addEventListener('input', updateComposerPreview);
+        }
+        smInitialized = true;
+    }
+}
+
+function switchSMSub(sub, btn) {
+    document.querySelectorAll('.sm-subnav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.sm-sub-content').forEach(c => c.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const el = document.getElementById('sm-' + sub);
+    if (el) el.classList.add('active');
+    if (sub === 'calendar') renderSMCalendar();
+    if (sub === 'posts') renderSMPosts();
+}
+
+function updateSMKPIs() {
+    const byStatus = { draft: 0, scheduled: 0, published: 0 };
+    smPosts.forEach(p => { byStatus[p.status] = (byStatus[p.status] || 0) + 1; });
+    const el = (id) => document.getElementById(id);
+    if (el('smScheduled')) el('smScheduled').textContent = byStatus.scheduled;
+    if (el('smFollowers')) el('smFollowers').textContent = '0';
+    if (el('smViews')) el('smViews').textContent = '0';
+    if (el('smLikes')) el('smLikes').textContent = '0';
+    if (el('smComments')) el('smComments').textContent = '0';
+    if (el('smDms')) el('smDms').textContent = '0';
+}
+
+// --- Composer ---
+function updateComposerPreview() {
+    const text = document.getElementById('smComposerText').value;
+    const captionEl = document.getElementById('smPreviewCaption');
+    if (captionEl) {
+        captionEl.innerHTML = '<strong>pawify.dev</strong> <span class="sm-phone-text">' + (text || 'Your caption will appear here...') + '</span>';
+    }
+}
+
+function handleSMMedia(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('smMediaPreview');
+        const placeholder = document.getElementById('smMediaPlaceholder');
+        const phoneImg = document.getElementById('smPreviewImage');
+        if (file.type.startsWith('image/')) {
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="preview">';
+            if (phoneImg) phoneImg.innerHTML = '<img src="' + e.target.result + '" alt="preview">';
+        } else {
+            preview.innerHTML = '<p>Video selected: ' + file.name + '</p>';
+        }
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+function saveSMDraft() {
+    const title = document.getElementById('smComposerText').value.trim();
+    if (!title) { toast('Write something first', 'error'); return; }
+    const platforms = [];
+    document.querySelectorAll('.sm-platform-check input:checked').forEach(cb => platforms.push(cb.value));
+    if (platforms.length === 0) { toast('Select at least one platform', 'error'); return; }
+
+    const post = {
+        id: Date.now(),
+        text: title,
+        platforms: platforms,
+        hashtags: document.getElementById('smComposerHashtags').value.trim(),
+        date: document.getElementById('smScheduleDate').value || null,
+        status: 'draft',
+        created: new Date().toISOString()
+    };
+    smPosts.push(post);
+    saveSMData();
+    updateSMKPIs();
+    document.getElementById('smComposerText').value = '';
+    document.getElementById('smComposerHashtags').value = '';
+    document.getElementById('smScheduleDate').value = '';
+    updateComposerPreview();
+    toast('Draft saved', 'success');
+}
+
+function scheduleSMPost() {
+    const title = document.getElementById('smComposerText').value.trim();
+    const dateVal = document.getElementById('smScheduleDate').value;
+    if (!title) { toast('Write something first', 'error'); return; }
+    if (!dateVal) { toast('Select a date and time to schedule', 'error'); return; }
+    const platforms = [];
+    document.querySelectorAll('.sm-platform-check input:checked').forEach(cb => platforms.push(cb.value));
+    if (platforms.length === 0) { toast('Select at least one platform', 'error'); return; }
+
+    const post = {
+        id: Date.now(),
+        text: title,
+        platforms: platforms,
+        hashtags: document.getElementById('smComposerHashtags').value.trim(),
+        date: dateVal,
+        status: 'scheduled',
+        created: new Date().toISOString()
+    };
+    smPosts.push(post);
+    saveSMData();
+    updateSMKPIs();
+    document.getElementById('smComposerText').value = '';
+    document.getElementById('smComposerHashtags').value = '';
+    document.getElementById('smScheduleDate').value = '';
+    updateComposerPreview();
+    toast('Post scheduled!', 'success');
+}
+
+// --- Calendar ---
+function renderSMCalendar() {
+    const titleEl = document.getElementById('smCalTitle');
+    const bodyEl = document.getElementById('smCalBody');
+    if (!titleEl || !bodyEl) return;
+
+    const year = smCalDate.getFullYear();
+    const month = smCalDate.getMonth();
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    titleEl.textContent = monthNames[month] + ' ' + year;
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    let startDay = firstDay.getDay() - 1;
+    if (startDay < 0) startDay = 6;
+
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+    let html = '';
+    // Previous month padding
+    const prevLast = new Date(year, month, 0).getDate();
+    for (let i = startDay - 1; i >= 0; i--) {
+        html += '<div class="sm-cal-cell other-month"><div class="sm-cal-day-num">' + (prevLast - i) + '</div></div>';
+    }
+    // Current month days
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+        const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        const isToday = dateStr === todayStr;
+        const dayPosts = smPosts.filter(p => p.date && p.date.startsWith(dateStr));
+        let postsHtml = dayPosts.map(p => '<div class="sm-cal-post ' + p.status + '" title="' + p.text.substring(0, 50) + '">' + p.platforms.join(', ') + '</div>').join('');
+        html += '<div class="sm-cal-cell' + (isToday ? ' today' : '') + '"><div class="sm-cal-day-num">' + d + '</div>' + postsHtml + '</div>';
+    }
+    // Next month padding
+    const totalCells = startDay + lastDay.getDate();
+    const remaining = (7 - (totalCells % 7)) % 7;
+    for (let i = 1; i <= remaining; i++) {
+        html += '<div class="sm-cal-cell other-month"><div class="sm-cal-day-num">' + i + '</div></div>';
+    }
+    bodyEl.innerHTML = html;
+}
+
+function smCalPrev() { smCalDate.setMonth(smCalDate.getMonth() - 1); renderSMCalendar(); }
+function smCalNext() { smCalDate.setMonth(smCalDate.getMonth() + 1); renderSMCalendar(); }
+
+// --- Posts List ---
+function renderSMPosts() {
+    const listEl = document.getElementById('smPostsList');
+    if (!listEl) return;
+
+    const statusFilter = document.getElementById('smPostFilter')?.value || 'all';
+    const platformFilter = document.getElementById('smPlatformFilter')?.value || 'all';
+
+    let filtered = smPosts.filter(p => {
+        if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+        if (platformFilter !== 'all' && !p.platforms.includes(platformFilter)) return false;
+        return true;
+    });
+
+    filtered.sort((a, b) => new Date(b.created) - new Date(a.created));
+
+    if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="sm-empty-state"><span>&#x1F4DD;</span><p>No posts yet. Create your first post in the <a href="#" onclick="switchSMSub(\'composer\', document.querySelector(\'[onclick*=composer]\'));return false;">Composer</a>.</p></div>';
+        return;
+    }
+
+    listEl.innerHTML = filtered.map(p => {
+        const platformBadges = p.platforms.map(pl => '<span class="sm-platform-badge ' + pl + '">' + pl.charAt(0).toUpperCase() + pl.slice(1) + '</span>').join(' ');
+        const dateStr = p.date ? new Date(p.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date';
+        return '<div class="sm-post-item">' +
+            '<div>' + platformBadges + '</div>' +
+            '<div class="sm-post-content"><div class="sm-post-title">' + p.text.substring(0, 80) + '</div><div class="sm-post-date">' + dateStr + '</div></div>' +
+            '<span class="sm-post-status ' + p.status + '">' + p.status + '</span>' +
+            '<div class="sm-post-actions">' +
+                '<button class="btn btn-ghost btn-small" onclick="editSMPost(' + p.id + ')">Edit</button>' +
+                '<button class="btn btn-ghost btn-small" onclick="deleteSMPost(' + p.id + ')">Del</button>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function editSMPost(id) {
+    const post = smPosts.find(p => p.id === id);
+    if (!post) return;
+    switchSMSub('composer', document.querySelector('[onclick*=composer]'));
+    document.getElementById('smComposerText').value = post.text;
+    document.getElementById('smComposerHashtags').value = post.hashtags || '';
+    if (post.date) document.getElementById('smScheduleDate').value = post.date;
+    document.querySelectorAll('.sm-platform-check input').forEach(cb => {
+        cb.checked = post.platforms.includes(cb.value);
+    });
+    updateComposerPreview();
+    // Remove original so re-saving creates updated version
+    smPosts = smPosts.filter(p => p.id !== id);
+    saveSMData();
+}
+
+function deleteSMPost(id) {
+    if (!confirm('Delete this post?')) return;
+    smPosts = smPosts.filter(p => p.id !== id);
+    saveSMData();
+    updateSMKPIs();
+    renderSMPosts();
+    renderSMCalendar();
+    toast('Post deleted', 'success');
+}
 
 // ===== INIT =====
 checkSession();
